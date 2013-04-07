@@ -19,6 +19,8 @@ else ifeq "$(build)" "native"
 CFLAGS += -pipe -O2 -DNDEBUG -fomit-frame-pointer -march=native -mfpmath=sse
 else ifeq "$(build)" "memento"
 CFLAGS += -pipe -g -DMEMENTO -DDEBUG
+else ifeq "$(build)" "nacl"
+CFLAGS += -pipe -DNDEBUG
 else
 $(error unknown build setting: '$(build)')
 endif

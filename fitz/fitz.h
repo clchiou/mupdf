@@ -23,10 +23,12 @@
 
 #include "memento.h"
 
+#if 0
 #ifdef __APPLE__
 #define HAVE_SIGSETJMP
 #elif defined(__unix)
 #define HAVE_SIGSETJMP
+#endif
 #endif
 
 #ifdef __ANDROID__

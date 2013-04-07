@@ -13,6 +13,7 @@ default: all
 # XCFLAGS or XLIBS instead. Make ignores any lines in the makefile that
 # set a variable that was set on the command line.
 CFLAGS += $(XCFLAGS) -Ifitz -Ipdf -Ixps -Icbz -Iscripts
+HOST_CFLAGS += $(HOST_XCFLAGS) -Ifitz -Ipdf -Ixps -Icbz -Iscripts
 LIBS += $(XLIBS) -lfreetype -ljbig2dec -ljpeg -lopenjpeg -lz -lm
 LIBS_V8 = $(LIBS) $(V8LIBS)
 
@@ -41,6 +42,9 @@ LINK_CMD = $(QUIET_LINK) $(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 LINK_V8_CMD = $(QUIET_LINK) $(CXX) $(LDFLAGS) -o $@ $^ $(LIBS_V8)
 MKDIR_CMD = $(QUIET_MKDIR) mkdir -p $@
 
+HOST_CC_CMD = $(QUIET_CC) $(HOST_CC) $(HOST_CFLAGS) -o $@ -c $<
+HOST_LINK_CMD = $(QUIET_LINK) $(HOST_CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+
 # --- Rules ---
 
 FITZ_HDR := fitz/fitz.h fitz/fitz-internal.h
@@ -48,8 +52,13 @@ MUPDF_HDR := $(FITZ_HDR) pdf/mupdf.h pdf/mupdf-internal.h
 MUXPS_HDR := $(FITZ_HDR) xps/muxps.h xps/muxps-internal.h
 MUCBZ_HDR := $(FITZ_HDR) cbz/mucbz.h
 
-$(OUT) $(GEN) :
+$(OUT) $(GEN) $(OUT)/host :
 	$(MKDIR_CMD)
+
+$(OUT)/host/% : $(OUT)/host/%.o
+	$(HOST_LINK_CMD)
+$(OUT)/host/%.o : scripts/%.c | $(OUT)/host
+	$(HOST_CC_CMD)
 
 $(OUT)/%.a :
 	$(AR_CMD)
@@ -71,8 +80,6 @@ $(OUT)/%.o : xps/%.c $(MUXPS_HDR) | $(OUT)
 $(OUT)/%.o : cbz/%.c $(MUCBZ_HDR) | $(OUT)
 	$(CC_CMD)
 $(OUT)/%.o : apps/%.c fitz/fitz.h pdf/mupdf.h xps/muxps.h cbz/mucbz.h | $(OUT)
-	$(CC_CMD)
-$(OUT)/%.o : scripts/%.c | $(OUT)
 	$(CC_CMD)
 
 .PRECIOUS : $(OUT)/%.o # Keep intermediates from chained rules
@@ -107,9 +114,9 @@ libs_v8: libs $(FITZ_V8_LIB)
 
 # --- Generated CMAP, FONT and JAVASCRIPT files ---
 
-CMAPDUMP := $(OUT)/cmapdump
-FONTDUMP := $(OUT)/fontdump
-CQUOTE := $(OUT)/cquote
+CMAPDUMP := $(OUT)/host/cmapdump
+FONTDUMP := $(OUT)/host/fontdump
+CQUOTE := $(OUT)/host/cquote
 
 CMAP_CNS_SRC := $(wildcard cmaps/cns/*)
 CMAP_GB_SRC := $(wildcard cmaps/gb/*)
@@ -157,7 +164,7 @@ generate: $(CMAP_HDR) $(FONT_HDR) $(JAVASCRIPT_HDR)
 $(OUT)/pdf_cmap_table.o : $(CMAP_HDR)
 $(OUT)/pdf_fontfile.o : $(FONT_HDR)
 $(OUT)/pdf_js.o : $(JAVASCRIPT_HDR)
-$(OUT)/cmapdump.o : pdf/pdf_cmap.c pdf/pdf_cmap_parse.c
+$(OUT)/host/cmapdump.o : pdf/pdf_cmap.c pdf/pdf_cmap_parse.c
 
 # --- Tools and Apps ---
 
@@ -208,18 +215,19 @@ libdir ?= $(prefix)/lib
 incdir ?= $(prefix)/include
 mandir ?= $(prefix)/share/man
 
-install: $(FITZ_LIB) $(MUVIEW) $(MUDRAW) $(MUTOOL)
+# Comment executives out as we don't need them and they break build.
+install: $(FITZ_LIB) $(OPENJPEG_LIB) # $(MUVIEW) $(MUDRAW) $(MUTOOL)
 	install -d $(bindir) $(libdir) $(incdir) $(mandir)/man1
-	install $(FITZ_LIB) $(libdir)
+	install $(FITZ_LIB) $(OPENJPEG_LIB) $(libdir)
 	install fitz/memento.h fitz/fitz.h pdf/mupdf.h xps/muxps.h cbz/mucbz.h $(incdir)
-	install $(MUVIEW) $(MUDRAW) $(MUTOOL) $(bindir)
 	install $(wildcard apps/man/*.1) $(mandir)/man1
 
 # --- Clean and Default ---
 
 all: all-nojs $(JSTARGETS)
 
-all-nojs: $(THIRD_LIBS) $(FITZ_LIB) $(MUVIEW) $(MUDRAW) $(MUTOOL)
+# Comment executives out as we don't need them and they break build.
+all-nojs: $(THIRD_LIBS) $(FITZ_LIB) # $(MUVIEW) $(MUDRAW) $(MUTOOL)
 
 third: $(THIRD_LIBS)
 
