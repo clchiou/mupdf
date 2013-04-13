@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# Copyright (c) 2013 Che-Liang Chiou. All rights reserved.
+# Use of this source code is governed by the GNU General Public License
+# as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
 
 source pkg_info
 source ../common.sh
@@ -34,7 +40,7 @@ CustomPackageInstall() {
   export PATH=${NACL_BIN_PATH}:${PATH};
 
   export CFLAGS="${CFLAGS:-} \
-	         -I=/usr/include/glibc-compat \
+                 -I=/usr/include/glibc-compat \
                  -I=/usr/include/freetype2"
   export HOST_CFLAGS="${NACLPORTS_CFLAGS}"
   export build=nacl
