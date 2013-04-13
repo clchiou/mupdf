@@ -43,7 +43,7 @@ LINK_V8_CMD = $(QUIET_LINK) $(CXX) $(LDFLAGS) -o $@ $^ $(LIBS_V8)
 MKDIR_CMD = $(QUIET_MKDIR) mkdir -p $@
 
 HOST_CC_CMD = $(QUIET_CC) $(HOST_CC) $(HOST_CFLAGS) -o $@ -c $<
-HOST_LINK_CMD = $(QUIET_LINK) $(HOST_CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+HOST_LINK_CMD = $(QUIET_LINK) $(HOST_CC) $(LDFLAGS) -o $@ $^
 
 # --- Rules ---
 
