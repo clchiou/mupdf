@@ -50,8 +50,9 @@ CustomPackageInstall() {
   echo "Directory: $(pwd)"
   LogExecute make -j${OS_JOBS} ${MAKE_TARGETS:-}
 
+  DefaultTranslateStep
+  DefaultValidateStep
   DefaultInstallStep
-  DefaultCleanUpStep
 }
 
 CustomPackageInstall
